@@ -1,5 +1,6 @@
 package com.company;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -9,9 +10,52 @@ public class PrintSkill {
     protected static final String[] WordsMedium = {"Etymology", "Subvention", "Leucopathy", "Undergroan", "Haematosis", "Interpoint", "Distringas", "Reexchange", "Volitional", "Serjeantcy", "Unpitousty", "Torpidness", "Culvertail", "Sapiential", "Funambulus", "Eliquation", "Ruffianous", "Eikosylene", "Adjectived", "Inbreaking"};
     protected static final String[] WordsHard = {"Galactometries", "Factionalising", "Eccentricities", "Dactylographer", "Cabinetworkers", "Abominableness", "Labiogressions", "Macroaggregate", "Nanotechnology", "Paddleboatings", "Quadriennially", "Easterlinesses", "Backwardations", "Xanthosiderite", "Zombifications", "Yieldabilities", "Wafflestompers", "Valedictorians", "Tachygraphical", "Karyoplasmatic"};
 
+    public static String userPath;
+
     public static void presentProgram() {
-        System.err.println("\nWelcome to PrintSkill! This program will help you improve your typing skills!");
-        System.err.println("First, choose the difficulty.");
+        System.err.println("Welcome to PrintSkill! This program will help you improve your typing skills!\n");
+    }
+
+    public static int getResultsNumber() throws FileNotFoundException {
+        Scanner scan = new Scanner(new File(userPath));
+        int i = 0;
+        boolean isCorrect;
+        do {
+            isCorrect = true;
+            try {
+                scan.nextFloat();
+                i = i + 1;
+            } catch (NoSuchElementException e) {
+                isCorrect = false;
+            }
+        } while (isCorrect);
+        return i;
+    }
+
+    public static void updateUserInfo() {
+        System.err.print("Enter username: ");
+        Scanner in = new Scanner(System.in);
+        String userName = in.nextLine();
+        userPath = "users\\" + userName + ".txt";
+        try {
+            Scanner scan = new Scanner(new File(userPath));
+            int size = getResultsNumber();
+            float [] results = new float[size];
+            int i, n;
+            for(n = 0; n < size; n++) {
+                results[n] = Float.parseFloat(scan.nextLine());
+            }
+            System.err.println("Hello, " + userName + ", here are your previous results: ");
+            for (i = 0; i < 10; i++) {
+                size = size - 1;
+                if(size > -1)
+                System.err.print("|" + results[size] + "| ");
+            }
+            System.err.println();
+        } catch (FileNotFoundException e){
+            System.err.println("Hello, " + userName + "!");
+            System.err.println("TIP: Use this username next time to upload the results.");
+        }
     }
 
     public static byte selectDifficulty() {
@@ -94,7 +138,7 @@ public class PrintSkill {
 
     public static void calculateResults() throws InterruptedException {
         TimeUnit.SECONDS.sleep(2);
-        System.err.print("Calculating results");
+        System.err.print("Calculating results\n");
         TimeUnit.SECONDS.sleep(1);
         System.err.print(".");
         TimeUnit.SECONDS.sleep(1);
@@ -104,7 +148,7 @@ public class PrintSkill {
     }
 
     public static void outResults(float result, byte difficulty) {
-        String FastestHand = "Your rating: 'The fastest hand in the Wild West.'";
+        String FastestHand = "Your rating: " + (char)34 + "The fastest hand in the Wild West" + (char)34 + ".";
         String Good = "Your rating: Good, but it could be better!";
         String Excellent = "Your rating: Excellent! Keep it up!";
         String Okay = "Your rating: Okay, but try your best next time!";
@@ -142,9 +186,10 @@ public class PrintSkill {
         scan.nextLine();
     }
 
-    public static void main (String[] args) throws InterruptedException {
+    public static void main (String[] args) throws InterruptedException, IOException {
         byte difficulty;
         presentProgram();
+        updateUserInfo();
         difficulty = selectDifficulty();
         echoDifficulty(difficulty);
         outWords();
@@ -154,6 +199,9 @@ public class PrintSkill {
         long time = (endTime - startTime);
         float result = (float)time/1000;
         System.err.println("\nTime spent: " + result + " seconds.");
+        FileWriter writer = new FileWriter(userPath, true);
+        writer.write(result + "\n");
+        writer.close();
         calculateResults();
         outResults(result, difficulty);
         pressAnyKey();
